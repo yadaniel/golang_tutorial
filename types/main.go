@@ -1,5 +1,7 @@
 package main
 
+// golang types and their usage
+
 import "fmt"
 
 func int_types() {
