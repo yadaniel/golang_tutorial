@@ -1,0 +1,35 @@
+# golang tutorial
+
+## builtin types
+
+integral types
+
+uint
+uint8 = byte
+uint16
+uint32
+uint64
+
+int
+int8 = sbyte
+int16
+int32
+int64
+
+float32
+float64
+
+## arrays and slices
+
+## struct types
+
+### value and pointer receiver
+
+## interface types
+
+# compiler and tooling related
+
+## source code organization (GOPATH)
+
+bash$ ***go env***
+will print go environmental variables
