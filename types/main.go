@@ -173,11 +173,185 @@ func function_types() {
 func misc() {
 	fmt.Printf("\n%d<%d>\n", 1) // 2 arguments expected, 1 given ... this is not compile error ... at runtime gives <%!d(MISSING)>
 	fmt.Printf("%d |", 1, 2)    // 1 argument expected, 2 given ... this is not compile error ... at runtime gives |%!(EXTRA int=2)
+	fmt.Println()
 }
 
-func array_types() {}
-func slice_types() {}
-func map_types()   {}
+func array_types() {
+	// explicit size
+	var arr1 [10]byte = [10]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	for idx, val := range arr1 {
+		fmt.Printf("arr[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// implicit size
+	var arr2 [10]byte = [...]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	//var arr2 [10]byte = [...]byte{0, 1, 2, 3, 4, 5, 6, 7, 8}	// compile error ... size must match
+	for idx, val := range arr2 {
+		fmt.Printf("arr[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// implicit size and variable declaration ... variable gets the type from [...]byte{} expression
+	arr3 := [...]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9} // array size can be omitted only here
+	for idx, val := range arr3 {
+		fmt.Printf("arr[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// how are arrays passed to functions
+	func(arr [10]byte) { // array size can not be omitted
+		arr[0] = 100 // this is local copy, arr3 is not changed
+	}(arr3)
+	for idx, val := range arr3 {
+		fmt.Printf("arr[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// how are arrays passed to functions
+	func(arr *[10]byte) {
+		arr[0] = 100    // this is reference, arr3 is changed ... syntax 1
+		(*arr)[0] = 200 // this is reference, arr3 is changed ... syntax 2
+	}(&arr3)
+	for idx, val := range arr3 {
+		fmt.Printf("arr[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// builtin function on array ... len (length)
+	fmt.Printf("len(arr3)=%d\n", len(arr3))
+}
+
+func slice_types() {
+	// non initialized slice
+	var s0 []int // is empty and safe to use
+	for idx, val := range s0 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// slice with 0 elements ... initialized with zero len slice
+	var s1 []int = []int{} // is empty and safe to use
+	for idx, val := range s1 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// slice with 0 elements ... initialized with builtin make function
+	var s2 []int = make([]int, 0) // is empty and safe to use
+	for idx, val := range s2 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// slice with 10 elements ... initialized with slice
+	var s3 []int = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	for idx, val := range s3 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// slice with 10 elements ... initialized with make function
+	var s4 []int = make([]int, 10) // all elements are default initialized with 0
+	for idx, val := range s4 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// builtin functions on slices ... len (length), cap (capacity), append
+	s5 := make([]int, 10)
+	fmt.Printf("len(s5)=%d, cap(s5)=%d\n", len(s5), cap(s5))
+	//
+	s5 = make([]int, 10, 20)
+	fmt.Printf("len(s5)=%d, cap(s5)=%d\n", len(s5), cap(s5))
+	//
+	s5 = append(s5, []int{10, 11, 12, 13, 14}...)
+	fmt.Printf("len(s5)=%d, cap(s5)=%d\n", len(s5), cap(s5))
+	for idx, val := range s5 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// append above capacity ... capacity is doubled when exceeded
+	s5 = append(s5, s5...)
+	fmt.Printf("len(s5)=%d, cap(s5)=%d\n", len(s5), cap(s5))
+	for idx, val := range s5 {
+		fmt.Printf("slice[%d]=%d, ", idx, val)
+	}
+	fmt.Println()
+	// slice indexing
+	s6 := make([]uint32, 10, 20) // len = 10, cap = 20
+	// from 0 to stop
+	s7 := s6[0:5] // from 0 to 5 (excluding), cap remains 20
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// from default 0 to stop
+	s7 = s6[:5] // from 0 to 5 (excluding), cap remains 20
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// from start to stop
+	s7 = s6[5:10] // from 5 to 10 (excluding), cap now 15
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// from start to default stop (len()+1)
+	s7 = s6[5:] // from 5 to 10 (excluding), cap now 15
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// from start to stop
+	s7 = s6[2:8] // cap now 18
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// image slice as data structure comprised of 3 pointers ... pstart, pstop (pointing to valid data) and pmax (pointing to allocated uninitialized memory)
+	// len being pstop-pstart+1, cap being pmax-pstart+1 (allocation logic not described)
+	// when subslice is taken with syntax slice[a:b], pstart of the sublice becomes pstart+a ... pstop, pmax remain ... len, cap change accordingly
+	s7 = s6[2:8:8] // 7 elements, cap now 6 ... cap is decreased
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// when subslice is taken with syntax slice[a:b:c] the possibility is given to cut the cap
+	// pstart of the sublice becomes pstart+a, pstop becomes pstop+b, pmax becomes c-a
+	s7 = s6[2:8:10] // 7 elements, cap now 8 ... cap is decreased
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	//
+	//s7 = s6[2:8:30] // 7 elements, cap now 28 .. cap can not be increased ... this is runtime error (panic)
+	//fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	s7 = s6[2:8:20] // 7 elements, cap 18 as it would be when c is omitted
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	s7 = s6[2:8] // 7 elements, cap 18
+	fmt.Printf("len()=%d, cap()=%d\n", len(s7), cap(s7))
+	// taking slice from array
+	arr := [...]int{0, 1, 2, 3, 4, 5, 6, 7}
+	fmt.Printf("%T ... %v\n", arr, arr)
+	s8 := arr[0:4] // the result is slice, cap = len(arr)
+	fmt.Printf("%T ... %v, len()=%d, cap()=%d\n", s8, s8, len(s8), cap(s8))
+	s8 = arr[0:4:8] // all slice indices can be used, cap = len(c-a) ... here 8 which is len(arr)
+	fmt.Printf("%T ... %v, len()=%d, cap()=%d\n", s8, s8, len(s8), cap(s8))
+	s8 = arr[0:4:5] // all slice indices can be used, cap = len(c-a) ... here 5
+	fmt.Printf("%T ... %v, len()=%d, cap()=%d\n", s8, s8, len(s8), cap(s8))
+}
+
+func map_types() {}
+
+func variable_declaration() {
+	// var syntax
+	var x1 int                                                // default initialized with 0
+	var x2 int = 10                                           // initialized with 10
+	var x3, x4 int                                            // both default initialized with 0
+	var x5, x6 int = 100, 200                                 // both initialized ... 100 and 200
+	_, _, _, _, _, _ = x1, x2, x3, x4, x5, x6                 // discard the value, compiler requires that variables are used
+	fmt.Printf("%d,%d,%d,%d,%d,%d\n", x1, x2, x3, x4, x5, x6) // or use them
+	// var block syntax
+	var (
+		x7       int
+		x8       int = 10
+		x9, x10  int
+		x11, x12 int = 100, 200
+	)
+	_, _, _, _, _, _ = x7, x8, x9, x10, x11, x12
+	fmt.Printf("%d,%d,%d,%d,%d,%d\n", x7, x8, x9, x10, x11, x12)
+}
+
+func const_declaration() {
+	// const syntax
+	//const X0	// initialization can not be omitted
+	const X1 = 0       // implicit type = int (default for numerical non-floating point literal)
+	const X2 int32 = 0 // explicit type, literal is casted to int32
+	const X3, X4 = 1, 2
+	const X5, X6 uint32 = 1, 2
+	//note: compiler does not require usage (read access not required)
+	// printed only to confirm the values
+	fmt.Printf("%d,%d,%d,%d,%d,%d\n", X1, X2, X3, X4, X5, X6)
+	// const block syntax
+	const (
+		X7              = 0
+		X8       uint32 = 0
+		X9, X10         = 1, 2
+		X11, X12 uint32 = 1, 2
+	)
+	fmt.Printf("%d,%d,%d,%d,%d,%d\n", X7, X8, X9, X10, X11, X12)
+}
 
 func main() {
 	int_types()
@@ -190,4 +364,6 @@ func main() {
 	slice_types()
 	map_types()
 	misc()
+	variable_declaration()
+	const_declaration()
 }
