@@ -143,6 +143,8 @@ func pointer_types() {
 	fmt.Printf("%p ... %d = %d\n", pu32, *pu32, u32)
 }
 
+func string_types() {}
+
 func function_types() {
 	var f0 func()
 	var f1 func(int) int
@@ -353,17 +355,36 @@ func const_declaration() {
 	fmt.Printf("%d,%d,%d,%d,%d,%d\n", X7, X8, X9, X10, X11, X12)
 }
 
+func type_alias() {
+	type ID uint32     // strict type
+	type GUID = uint32 // alias type
+	var u32 uint32 = 10
+	var id ID = 10
+	var guid GUID = 10
+	/*
+		if u32 == id {	// compile error ... type mismatch uint32 and ID
+			fmt.Println("equal")
+		}
+	*/
+	if u32 == guid {
+		fmt.Println("equal")
+	}
+	fmt.Printf("%d,%d,%d\n", id, guid, u32)
+}
+
 func main() {
 	int_types()
 	bool_type()
 	float_types()
+	string_types()
 	struct_types()
 	pointer_types()
 	function_types()
 	array_types()
 	slice_types()
 	map_types()
-	misc()
 	variable_declaration()
 	const_declaration()
+	type_alias()
+	misc()
 }
