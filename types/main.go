@@ -217,6 +217,35 @@ func array_types() {
 	fmt.Println()
 	// builtin function on array ... len (length)
 	fmt.Printf("len(arr3)=%d\n", len(arr3))
+	// arrays can be compared when the arrays have the same type ... [N]type
+	if arr1 == arr2 {
+		fmt.Println("[arr1==arr2] equal")
+	}
+	arr4 := [...]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+	fmt.Printf("arr4 = %v\n", arr4)
+	/*
+		// compile error ... mismatched types [10]byte and [15]byte
+		if arr1 == arr4 {
+			fmt.Println("[arr1==arr4] equal")
+		} else {
+			fmt.Println("[arr1!=arr4] not equal")
+		}
+	*/
+	// array assignment semantic (value semantic)
+	arr5 := [...]uint32{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	arr6 := arr5 // copy is created
+	fmt.Printf("arr5 = %v ... arr6 = %v\n", arr5, arr6)
+	arr6[0] = 10 // arr5 not changed
+	fmt.Printf("arr5 = %v ... arr6 = %v\n", arr5, arr6)
+	// array can not be assigned nil
+	//arr6 = nil
+	// empty array ... the set of the array type have special value, empty array
+	arr7 := [0]uint32{}
+	arr8 := [...]uint32{}
+	if arr7 == arr8 {
+		fmt.Println("[arr7 == arr8] empty array are equal")
+	}
+	fmt.Printf("[arr7,arr8] have types %T ... %T\n", arr7, arr8)
 }
 
 func slice_types() {
@@ -312,9 +341,55 @@ func slice_types() {
 	fmt.Printf("%T ... %v, len()=%d, cap()=%d\n", s8, s8, len(s8), cap(s8))
 	s8 = arr[0:4:5] // all slice indices can be used, cap = len(c-a) ... here 5
 	fmt.Printf("%T ... %v, len()=%d, cap()=%d\n", s8, s8, len(s8), cap(s8))
+	// slice assignment semantics (reference semantic)
+	s9 := []uint32{0, 1, 2, 3, 4, 5, 7, 8, 9}
+	s10 := s9 // s10 is reference, not copy
+	/*
+		// 2 slices can not be compared
+		if s9 == s10 {
+			fmt.Println("slices equal")
+		}
+	*/
+	fmt.Printf("[s9] %v ... %v\n", s9, s10)
+	s10[0] = 10 // change s10, both change
+	fmt.Printf("[s9] %v ... %v\n", s9, s10)
+	//
+	s11 := []uint32{} // slice is empty but not nil
+	if s11 == nil {
+		fmt.Println("[s11] slice is nil")
+	} else {
+		fmt.Println("[s11] slice is not nil")
+	}
+	s11 = nil // slice variable can be assigned nil
+	if s11 == nil {
+		fmt.Println("[s11 nil] slice is nil")
+	} else {
+		fmt.Println("[s11 nil] slice is not nil")
+	}
+	// slice type does not include the len and cap, only the []type
+	s12 := []uint32{}
+	s13 := []uint32{0}
+	s14 := make([]uint32, 0, 10)
+	fmt.Printf("[s12,s13,s14] %T,%T,%T\n", s12, s13, s14)
 }
 
-func map_types() {}
+func map_types() {
+	var m1 map[int]string       // default is nil
+	var m2 map[int]string = nil // explicit initialization
+	fmt.Printf("[m1,m2] %T ... %T\n", m1, m2)
+	if m1 == nil {
+		fmt.Println("map is inizialized to nil ... default")
+	}
+	/*
+		// map can only be compared to nil
+		if m1 == m2 {
+			fmt.Println("map can not be compared")
+		}
+	*/
+	for key, val := range m2 {
+		fmt.Printf("[map] %v -> %v\n", key, val)
+	}
+}
 
 func variable_declaration() {
 	// var syntax
