@@ -1,0 +1,5 @@
+= shows how to use local modules
+
+cd mod_user
+go build -o mod_user.exe
+
