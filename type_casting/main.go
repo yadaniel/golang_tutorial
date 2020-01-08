@@ -71,10 +71,20 @@ func test3() {
 	Println(u, err_u)
 }
 
+func test6() {
+	Println("format bool = " + strconv.FormatBool(true))
+	Println("format float = " + strconv.FormatFloat(1.234, 'E', -1, 64))
+	Println("format int with base16 = " + strconv.FormatInt(-255, 16))
+	Println("format uint with base16 = " + strconv.FormatUint(255, 16))
+
+	Println(Sprintf("0x%X", 255))
+}
+
 func main() {
 	test1()
 	test2()
 	test3()
 	test4()
 	test5()
+	test6()
 }
